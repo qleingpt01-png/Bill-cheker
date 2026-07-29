@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>請求書チェックツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="app-header">
+    <div class="hanko-mark" aria-hidden="true">検</div>
+    <div class="app-header__text">
+      <h1>請求書チェックツール</h1>
+      <p class="app-header__sub">請求書を読み込むと、内容の転記と不備チェックを自動で行います</p>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- 左カラム：ファイル読み込み -->
+    <section class="panel drop-panel" aria-labelledby="dropPanelTitle">
+      <h2 id="dropPanelTitle" class="panel-title">1. 請求書を読み込む</h2>
+
+      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="請求書ファイルを選択">
+        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,application/pdf" hidden>
+        <div class="drop-zone__icon">📄</div>
+        <p class="drop-zone__title">ここに請求書ファイルをドラッグ＆ドロップ</p>
+        <p class="drop-zone__sub">または <span class="link-text">クリックしてファイルを選択</span></p>
+        <p class="drop-zone__formats">対応形式：PNG ・ JPG ・ PDF</p>
+      </div>
+
+      <div id="previewArea" class="preview-card" hidden>
+        <div class="preview-card__icon" id="previewIcon">📄</div>
+        <div class="preview-card__info">
+          <p class="preview-card__label">読み込み済みファイル</p>
+          <p id="previewName" class="preview-card__name"></p>
+        </div>
+        <button type="button" id="resetButton" class="text-button">別のファイルを読み込む</button>
+      </div>
+
+      <div id="statusArea" class="status-area" hidden></div>
+    </section>
+
+    <!-- 右カラム：自動入力フォーム -->
+    <section class="panel form-panel" aria-labelledby="formPanelTitle">
+      <h2 id="formPanelTitle" class="panel-title">2. 読み取り結果（修正できます）</h2>
+
+      <form id="invoiceForm" class="invoice-form" autocomplete="off">
+        <div class="field">
+          <label for="invoiceNumber">請求書番号</label>
+          <input type="text" id="invoiceNumber" name="invoiceNumber" placeholder="例）INV-2026-0001">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="issueDate">発行日</label>
+            <input type="date" id="issueDate" name="issueDate">
+          </div>
+          <div class="field">
+            <label for="dueDate">支払期限</label>
+            <input type="date" id="dueDate" name="dueDate">
+          </div>
+        </div>
+
+        <div class="field-row field-row--amounts">
+          <div class="field">
+            <label for="subtotal">税抜き金額（円）</label>
+            <input type="text" inputmode="numeric" id="subtotal" name="subtotal" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="tax">消費税（円）</label>
+            <input type="text" inputmode="numeric" id="tax" name="tax" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="total">合計金額（円）</label>
+            <input type="text" inputmode="numeric" id="total" name="total" placeholder="0">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="bankAccount">振込先</label>
+          <textarea id="bankAccount" name="bankAccount" rows="2" placeholder="例）〇〇銀行 〇〇支店 普通 1234567 カ）〇〇"></textarea>
+        </div>
+
+        <button type="button" id="recheckButton" class="secondary-button">この内容で再チェックする</button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- 検印チェック結果 -->
+  <section class="panel check-panel" aria-labelledby="checkPanelTitle">
+    <h2 id="checkPanelTitle" class="panel-title">3. 検印チェック</h2>
+    <p id="checkEmpty" class="check-empty">請求書を読み込むと、ここにチェック結果が表示されます。</p>
+    <ul id="checkList" class="check-list" hidden></ul>
+
+    <button type="button" id="writeSheetButton" class="primary-button" disabled>
+      この内容をスプレッドシートに書き込む
+    </button>
+  </section>
+
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<div id="loadingOverlay" class="loading-overlay" hidden>
+  <div class="loading-card">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <p>Geminiが請求書を読み取っています…</p>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
