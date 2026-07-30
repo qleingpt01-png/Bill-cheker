@@ -15,7 +15,7 @@
 // ==========================================
 // GASでデプロイした「ウェブアプリのURL」をここに入力してください
 // 例: https://script.google.com/macros/s/XXX/exec
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbz_to_Acm-OASstc758GjR2Mk4gL_oJYx6cDdOygwXT5xzU_pilbVoDx8BY2JT8_Zbn/exec';
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyX9Zs8QPUg64gtpcqtcozNx2004kLSFDUbdX8pE_alnvTK-1ftNZ66Cy5AF3HbxIqhLQ/exec';
 // ==========================================
 
 // 読み込みを許可するファイル形式・サイズの上限
