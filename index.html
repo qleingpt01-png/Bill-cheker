@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>請求書チェックツール</title>
+<title>請求書チェックツール V2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -17,93 +17,114 @@
     <div class="hanko-mark" aria-hidden="true">検</div>
     <div class="app-header__text">
       <h1>請求書チェックツール</h1>
-      <p class="app-header__sub">請求書を読み込むと、内容の転記と不備チェックを自動で行います</p>
+      <p class="app-header__sub">複数請求書を一括読み取りし、重複・不備チェックとスプレッドシート書き込みを行います</p>
     </div>
   </header>
 
-  <main class="layout">
+  <main class="main-content">
 
-    <!-- 左カラム：ファイル読み込み -->
-    <section class="panel drop-panel" aria-labelledby="dropPanelTitle">
-      <h2 id="dropPanelTitle" class="panel-title">1. 請求書を読み込む</h2>
+    <!-- ファイル選択・アップロードエリア -->
+    <section class="panel upload-panel" aria-labelledby="uploadPanelTitle">
+      <h2 id="uploadPanelTitle" class="panel-title">1. 請求書ファイルをまとめて選択</h2>
 
       <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="請求書ファイルを選択">
-        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,application/pdf" hidden>
-        <div class="drop-zone__icon">📄</div>
-        <p class="drop-zone__title">ここに請求書ファイルをドラッグ＆ドロップ</p>
-        <p class="drop-zone__sub">または <span class="link-text">クリックしてファイルを選択</span></p>
-        <p class="drop-zone__formats">対応形式：PNG ・ JPG ・ PDF</p>
+        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,application/pdf" multiple hidden>
+        <div class="drop-zone__icon">📁</div>
+        <p class="drop-zone__title">ここに請求書ファイルをまとめてドラッグ＆ドロップ</p>
+        <p class="drop-zone__sub">または <span class="link-text">クリックして複数ファイルを選択</span></p>
+        <p class="drop-zone__formats">対応形式：PNG ・ JPG ・ PDF （複数ファイルの一括選択に対応）</p>
       </div>
 
-      <div id="previewArea" class="preview-card" hidden>
-        <div class="preview-card__icon" id="previewIcon">📄</div>
-        <div class="preview-card__info">
-          <p class="preview-card__label">読み込み済みファイル</p>
-          <p id="previewName" class="preview-card__name"></p>
+      <!-- 選択中ファイルリスト表示 -->
+      <div id="fileSelectionArea" class="file-selection-area" hidden>
+        <div class="file-selection-header">
+          <div class="file-selection-count">
+            <span class="count-badge" id="selectedCountBadge">0件</span>
+            <span class="count-text">のファイルが選択されています</span>
+          </div>
+          <button type="button" id="resetFilesButton" class="text-button">ファイルを再選択</button>
         </div>
-        <button type="button" id="resetButton" class="text-button">別のファイルを読み込む</button>
+        <div id="fileListContainer" class="file-list-container"></div>
+
+        <button type="button" id="processButton" class="action-button">
+          ✨ アップロードして読み取る
+        </button>
       </div>
 
       <div id="statusArea" class="status-area" hidden></div>
     </section>
 
-    <!-- 右カラム：自動入力フォーム -->
-    <section class="panel form-panel" aria-labelledby="formPanelTitle">
-      <h2 id="formPanelTitle" class="panel-title">2. 読み取り結果（修正できます）</h2>
-
-      <form id="invoiceForm" class="invoice-form" autocomplete="off">
-        <div class="field">
-          <label for="invoiceNumber">請求書番号</label>
-          <input type="text" id="invoiceNumber" name="invoiceNumber" placeholder="例）INV-2026-0001">
+    <!-- チェック項目・必須項目のガイド表示 -->
+    <section class="panel guide-panel">
+      <h3 class="guide-title">💡 チェック項目と必須項目について</h3>
+      <div class="guide-grid">
+        <div class="guide-item">
+          <span class="guide-tag guide-tag--required">必須項目</span>
+          <p><strong>請求書番号・発行日・支払期限・振込先・金額</strong> の5項目。未入力があると「要確認」となります。</p>
         </div>
-
-        <div class="field-row">
-          <div class="field">
-            <label for="issueDate">発行日</label>
-            <input type="date" id="issueDate" name="issueDate">
-          </div>
-          <div class="field">
-            <label for="dueDate">支払期限</label>
-            <input type="date" id="dueDate" name="dueDate">
-          </div>
+        <div class="guide-item">
+          <span class="guide-tag guide-tag--calc">税額計算</span>
+          <p><strong>税抜き金額 ＋ 消費税 ＝ 合計金額</strong> が正しいか検証。不一致時は「要確認」となります。</p>
         </div>
-
-        <div class="field-row field-row--amounts">
-          <div class="field">
-            <label for="subtotal">税抜き金額（円）</label>
-            <input type="text" inputmode="numeric" id="subtotal" name="subtotal" placeholder="0">
-          </div>
-          <div class="field">
-            <label for="tax">消費税（円）</label>
-            <input type="text" inputmode="numeric" id="tax" name="tax" placeholder="0">
-          </div>
-          <div class="field">
-            <label for="total">合計金額（円）</label>
-            <input type="text" inputmode="numeric" id="total" name="total" placeholder="0">
-          </div>
+        <div class="guide-item">
+          <span class="guide-tag guide-tag--date">支払期限</span>
+          <p>支払期限が本日時点で<strong>期限切れ</strong>になっていないかチェックします。</p>
         </div>
-
-        <div class="field">
-          <label for="bankAccount">振込先</label>
-          <textarea id="bankAccount" name="bankAccount" rows="2" placeholder="例）〇〇銀行 〇〇支店 普通 1234567 カ）〇〇"></textarea>
+        <div class="guide-item">
+          <span class="guide-tag guide-tag--dup">重複チェック</span>
+          <p>同一ファイルや、請求書番号・振込先・合計金額が完全に一致するデータを<strong>自動検出</strong>します。</p>
         </div>
+      </div>
+    </section>
 
-        <button type="button" id="recheckButton" class="secondary-button">この内容で再チェックする</button>
-      </form>
+    <!-- 2. 一覧テーブル表示エリア -->
+    <section class="panel table-panel" aria-labelledby="tablePanelTitle">
+      <div class="table-panel-header">
+        <h2 id="tablePanelTitle" class="panel-title">2. アップロード請求書一覧・チェック結果</h2>
+        <div id="tableSummary" class="table-summary" hidden>
+          全 <span id="totalRowsCount">0</span> 件 （正常: <span id="okRowsCount" class="text-ok">0</span> 件 / 要確認: <span id="warnRowsCount" class="text-warn">0</span> 件 / 重複: <span id="dupRowsCount" class="text-dup">0</span> 件）
+        </div>
+      </div>
+
+      <div id="tableEmpty" class="table-empty">
+        <p>請求書ファイルをアップロードすると、ここに一覧とチェック結果が表示されます。</p>
+      </div>
+
+      <div id="tableWrapper" class="table-wrapper" hidden>
+        <table id="invoiceTable" class="invoice-table">
+          <thead>
+            <tr>
+              <th class="col-num">No.</th>
+              <th class="col-filename">ファイル名</th>
+              <th class="col-field">請求書番号</th>
+              <th class="col-field">発行日</th>
+              <th class="col-field">支払期限</th>
+              <th class="col-field">税抜き金額</th>
+              <th class="col-field">消費税</th>
+              <th class="col-field">合計金額</th>
+              <th class="col-field col-bank">振込先情報</th>
+              <th class="col-check">重複</th>
+              <th class="col-check">1.必須項目</th>
+              <th class="col-check">2.税額計算</th>
+              <th class="col-check">3.支払期限</th>
+              <th class="col-check">4.振込先</th>
+            </tr>
+          </thead>
+          <tbody id="invoiceTableBody">
+            <!-- JavaScriptで動的生成 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- スプレッドシート書き込みボタン -->
+      <div class="table-actions">
+        <button type="button" id="writeSheetButton" class="primary-button" disabled>
+          📊 全データをスプレッドシートに書き込む
+        </button>
+      </div>
     </section>
 
   </main>
-
-  <!-- 検印チェック結果 -->
-  <section class="panel check-panel" aria-labelledby="checkPanelTitle">
-    <h2 id="checkPanelTitle" class="panel-title">3. 検印チェック</h2>
-    <p id="checkEmpty" class="check-empty">請求書を読み込むと、ここにチェック結果が表示されます。</p>
-    <ul id="checkList" class="check-list" hidden></ul>
-
-    <button type="button" id="writeSheetButton" class="primary-button" disabled>
-      この内容をスプレッドシートに書き込む
-    </button>
-  </section>
 
 </div>
 
@@ -112,7 +133,8 @@
 <div id="loadingOverlay" class="loading-overlay" hidden>
   <div class="loading-card">
     <div class="loading-spinner" aria-hidden="true"></div>
-    <p>Geminiが請求書を読み取っています…</p>
+    <p id="loadingText">Geminiが請求書を読み取っています…</p>
+    <p id="loadingProgress" class="loading-progress"></p>
   </div>
 </div>
 
