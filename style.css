@@ -503,10 +503,42 @@ body {
 /* スプレッドシート書き込みエリア */
 .table-actions {
   margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border: 1px solid var(--ok);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #FFFFFF;
+  color: var(--ok);
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.secondary-button:hover {
+  background: var(--ok-bg);
+  border-color: #255C4E;
+}
+
+.secondary-button:active {
+  transform: translateY(1px);
 }
 
 .primary-button {
-  width: 100%;
+  flex: 1;
+  min-width: 260px;
   padding: 14px 20px;
   border: none;
   border-radius: 999px;
