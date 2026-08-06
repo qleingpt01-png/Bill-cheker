@@ -13,6 +13,10 @@
 // ★ 設定項目（ご自身の環境に合わせて変更してください）
 // ==========================================
 const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyX9Zs8QPUg64gtpcqtcozNx2004kLSFDUbdX8pE_alnvTK-1ftNZ66Cy5AF3HbxIqhLQ/exec';
+
+// ↓↓↓ 【ここにスプレッドシートのURLを記入してください】 ↓↓↓
+const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1ZP0qekISnCaBhW_32Ys2VhI6rgsnsyHrzUnNHLXCRFY/edit?gid=0#gid=0';
+// ↑↑↑ 【ここにスプレッドシートのURLを記入してください】 ↑↑↑
 // ==========================================
 
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
@@ -47,6 +51,7 @@ const tableEmpty = document.getElementById('tableEmpty');
 const tableWrapper = document.getElementById('tableWrapper');
 const invoiceTableBody = document.getElementById('invoiceTableBody');
 const writeSheetButton = document.getElementById('writeSheetButton');
+const openSpreadsheetButton = document.getElementById('openSpreadsheetButton');
 
 const loadingOverlay = document.getElementById('loadingOverlay');
 const loadingText = document.getElementById('loadingText');
@@ -57,6 +62,20 @@ const toast = document.getElementById('toast');
    初期化
 ------------------------------------------------------------ */
 function init() {
+  // スプレッドシートボタンのURL設定
+  if (openSpreadsheetButton) {
+    if (SPREADSHEET_URL && !SPREADSHEET_URL.includes('YOUR_SPREADSHEET_ID_HERE')) {
+      openSpreadsheetButton.href = SPREADSHEET_URL;
+    } else {
+      openSpreadsheetButton.addEventListener('click', (e) => {
+        if (!SPREADSHEET_URL || SPREADSHEET_URL.includes('YOUR_SPREADSHEET_ID_HERE')) {
+          e.preventDefault();
+          showToast('script.js の SPREADSHEET_URL にスプレッドシートのURLを設定してください。', 'error');
+        }
+      });
+    }
+  }
+
   if (!WEBAPP_URL) {
     showStatus(
       '【デモモード】現在 WEBAPP_URL が未設定のためデモモードで動作します。試用用ダミーデータで動作検証が可能です。',
